@@ -1,0 +1,6 @@
+dependencies:
+  cellular:
+    url: github.com/toitware/cellular
+    version: ^1.0.0
+  ublox_cellular:
+    path: ..
