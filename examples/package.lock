@@ -1,4 +1,5 @@
 prefixes:
+  cellular: cellular
   ublox_cellular: ..
 packages:
   ..:
