@@ -13,7 +13,6 @@ import cellular
 import gpio
 import http.client show Client
 import log
-import monitor
 import net
 import uart
 import ublox_cellular.sara_r4 show SaraR4
