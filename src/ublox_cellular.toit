@@ -159,7 +159,7 @@ class TcpSocket extends Socket_ implements tcp.Socket:
       // Allow the close command to fail. If the socket has already been closed
       // but we haven't processed the notification yet, we sometimes get a
       // harmless 'operation not allowed' message that we ignore.
-      catch --trace=(: it != "+CME ERROR: Operation not allowed []"):
+      catch --unwind=(: it != "+CME ERROR: Operation not allowed []"):
         cellular_.at_.do:
           if not it.is_closed:
             it.send
