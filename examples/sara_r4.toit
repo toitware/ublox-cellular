@@ -49,7 +49,11 @@ create_driver -> SaraR4:
 
   port := uart.Port --tx=tx --rx=rx --baud_rate=cellular.Cellular.DEFAULT_BAUD_RATE
 
-  return SaraR4 port --pwr_on=(gpio.InvertedPin pwr_on) --reset_n=(gpio.InvertedPin reset_n) --logger=log.default
+  return SaraR4 port
+      --pwr_on=gpio.InvertedPin pwr_on
+      --reset_n=gpio.InvertedPin reset_n
+      --logger=log.default
+      --is_always_online
 
 reset driver:
   driver.wait_for_ready
