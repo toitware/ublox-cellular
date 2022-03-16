@@ -460,22 +460,24 @@ abstract class UBloxCellular extends CellularBase:
         if apply_configs_ session:
           should_reboot = true
 
+        if configure_psm_ session --enable=use_psm:
+          should_reboot = true
+
         if should_reboot:
           reboot_ session
           continue
 
-        configure_psm_ session --enable=use_psm
-
         break
 
-  configure_psm_ session/at.Session --enable/bool --periodic_tau/string="00111000":
+  configure_psm_ session/at.Session --enable/bool --periodic_tau/string="00111000" -> bool:
     psm_target := enable ? 1 : 0
 
     session.send_non_check
       at.Command.set "+CEDRXS" --parameters=[0]
     psm_value := session.read "+CPSMS"
     psv_value := session.read "+UPSV"
-    if psm_value.single[0] == psm_target and psv_value.single[0] == psm_target: return
+    if psm_value.single[0] == psm_target and psv_value.single[0] == psm_target:
+      return false
 
     if enable:
       session.set "+UPSV" [4]
@@ -483,6 +485,7 @@ abstract class UBloxCellular extends CellularBase:
     else:
       session.set "+UPSV" [0]
       session.set "+CPSMS" [0]
+    return true
 
   apply_configs_ session/at.Session -> bool:
     changed := false
