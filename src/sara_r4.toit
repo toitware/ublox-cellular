@@ -32,7 +32,7 @@ class SaraR4 extends UBloxCellular:
       --config=CONFIG_
       --cat_m1
       --cat_nb1
-      --preferred_baud_rate=460800
+      --preferred_baud_rate=460_800
       --async_socket_connect
       --async_socket_close
       --use_psm=not is_always_online
