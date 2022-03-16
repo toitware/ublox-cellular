@@ -407,8 +407,12 @@ abstract class UBloxCellular extends CellularBase:
       uart_.close
 
   iccid:
-    r := at_.do: it.read "+CCID"
-    return r.single[0]
+    for attempts := 0; true; attempts++:
+      at_.do:
+        catch --unwind=(: attempts > 3):
+          r := it.read "+CCID"
+          return r.single[0]
+      sleep --ms=1_000
 
   sleep_:
     at_.do: it.set "+UPSV" [4]
@@ -439,7 +443,6 @@ abstract class UBloxCellular extends CellularBase:
         if cat_m1: rat.add RAT_CAT_M1_
         if cat_nb1: rat.add RAT_CAT_NB1_
         if (get_rat_ session) != rat:
-
           set_rat_ session rat
           should_reboot = true
 

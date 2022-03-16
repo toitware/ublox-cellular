@@ -26,7 +26,6 @@ class SaraR5 extends UBloxCellular:
       --logger=logger
       --config=CONFIG_
       --cat_m1
-      --cat_nb1
       --preferred_baud_rate=921_600 // TODO(kasper): Testing - was 3_250_000.
       --use_psm=not is_always_online
 
