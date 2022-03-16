@@ -408,9 +408,9 @@ abstract class UBloxCellular extends CellularBase:
 
   iccid:
     for attempts := 0; true; attempts++:
-      at_.do:
+      at_.do: | session/at.Session |
         catch --unwind=(: attempts > 3):
-          r := it.read "+CCID"
+          r := session.read "+CCID"
           return r.single[0]
       sleep --ms=1_000
 
