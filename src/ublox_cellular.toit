@@ -468,22 +468,30 @@ abstract class UBloxCellular extends CellularBase:
 
   // TODO(kasper): Testing - default periodic tau is 70h.
   configure_psm_ session/at.Session --enable/bool --periodic_tau/string="01000111" -> bool:
-    psm_target := enable ? 1 : 0
-
+    // TODO(kasper): Do we need to reboot if this changed?
     session.send_non_check
-      at.Command.set "+CEDRXS" --parameters=[0]
-    psm_value := session.read "+CPSMS"
-    psv_value := session.read "+UPSV"
-    if psm_value.single[0] == psm_target and psv_value.single[0] == psm_target:
-      return false
+        at.Command.set "+CEDRXS" --parameters=[0]
 
-    if enable:
-      session.set "+UPSV" [1, 2000]  // TODO(kasper): Testing - go to sleep after ~9.2s.
-      session.set "+CPSMS" [1, null, null, periodic_tau, "00000000"]
-    else:
-      session.set "+UPSV" [0]
-      session.set "+CPSMS" [0]
-    return true
+    psm_changed/bool := false
+    psm_target := enable ? 1 : 0
+    psm_value := session.read "+CPSMS"
+    if psm_value.single[0] != psm_target:
+      psm_changed = true  // PMS changes require a modem reboot. Remember it.
+      if enable:
+        session.set "+CPSMS" [1, null, null, periodic_tau, "00000000"]
+      else:
+        session.set "+CPSMS" [0]
+
+    psv_value := session.read "+UPSV"
+    psv_target := enable ? 1 : 0
+    if psv_value.single[0] != psv_target:
+      if enable:
+        session.set "+UPSV" [1, 2000]  // TODO(kasper): Testing - go to sleep after ~9.2s.
+      else:
+        session.set "+UPSV" [0]
+
+    // Reboot only if PSM changed.
+    return psm_changed
 
   apply_configs_ session/at.Session -> bool:
     changed := false
@@ -501,9 +509,12 @@ abstract class UBloxCellular extends CellularBase:
     return false
 
   on_connect_aborted session/at.Session -> none:
+    print_ "[on connect aborted]"
     critical_do --no-respect_deadline:
-      catch: with_timeout --ms=1_000:
+      catch: with_timeout --ms=3_000:
+        print_ "[on connect aborted => ping]"
         session.action "" --no-check  // Ping to flush out "+CME ERROR: Command aborted" error.
+        print_ "[on connect aborted => done]"
 
   get_mno_ session/at.Session:
     result := session.read "+UMNOPROF"
