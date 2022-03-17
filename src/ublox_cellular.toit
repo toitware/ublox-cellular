@@ -508,7 +508,7 @@ abstract class UBloxCellular extends CellularBase:
         return true
     return false
 
-  on_connect_aborted session/at.Session -> none:
+  on_cops_aborted session/at.Session -> none:
     print_ "[on connect aborted]"
     critical_do --no-respect_deadline:
       catch: with_timeout --ms=3_000:
