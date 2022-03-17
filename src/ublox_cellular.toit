@@ -509,12 +509,9 @@ abstract class UBloxCellular extends CellularBase:
     return false
 
   on_cops_aborted session/at.Session -> none:
-    print_ "[on connect aborted]"
     critical_do --no-respect_deadline:
-      e := catch: with_timeout --ms=3_000:
-        print_ "[on connect aborted => ping]"
+      catch: with_timeout --ms=2_000:
         session.action "" --no-check  // Ping to flush out "+CME ERROR: Command aborted" error.
-      print_ "[on connect aborted => done: $e]"
 
   get_mno_ session/at.Session:
     result := session.read "+UMNOPROF"
