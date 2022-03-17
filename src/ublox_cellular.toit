@@ -414,9 +414,6 @@ abstract class UBloxCellular extends CellularBase:
           return r.single[0]
       sleep --ms=1_000
 
-  sleep_:
-    at_.do: it.set "+UPSV" [4]
-
   should_set_mno_ session/at.Session mno -> bool:
     current_mno := get_mno_ session
     if mno == 1:
@@ -469,7 +466,8 @@ abstract class UBloxCellular extends CellularBase:
 
         break
 
-  configure_psm_ session/at.Session --enable/bool --periodic_tau/string="00111000" -> bool:
+  // TODO(kasper): Testing - default periodic tau is 70h.
+  configure_psm_ session/at.Session --enable/bool --periodic_tau/string="01000111" -> bool:
     psm_target := enable ? 1 : 0
 
     session.send_non_check
@@ -480,7 +478,7 @@ abstract class UBloxCellular extends CellularBase:
       return false
 
     if enable:
-      session.set "+UPSV" [4]
+      session.set "+UPSV" [1, 2000]  // TODO(kasper): Testing - go to sleep after ~9.2s.
       session.set "+CPSMS" [1, null, null, periodic_tau, "00000000"]
     else:
       session.set "+UPSV" [0]
