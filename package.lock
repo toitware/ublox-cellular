@@ -3,8 +3,8 @@ prefixes:
 packages:
   cellular:
     url: github.com/toitware/cellular
-    version: 1.0.9
-    hash: f803aaefa4858b5bd6765bdfc1ace5bc8e2d457b
+    version: 1.0.10
+    hash: 53772a7e6c8f0e7a8fe65ac3ed9a9ea9491ffc7c
     prefixes:
       gnss_location: toit-gnss-location
   toit-gnss-location:

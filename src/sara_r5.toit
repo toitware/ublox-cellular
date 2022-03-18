@@ -31,10 +31,11 @@ class SaraR5 extends UBloxCellular:
 
   on_connected_ session/at.Session:
     // Attach to network.
-    session.set "+UPSD" [0, 100, 1]
-    session.set "+UPSD" [0, 0, 0]
-    send_abortable_ session (UPSDA --action=0)
-    send_abortable_ session (UPSDA --action=3)
+    changed := apply_config_ session "+UPSD" [0, 100, 1]
+    changed = (apply_config_ session "+UPSD" [0, 0, 0]) or changed
+    if changed:
+      send_abortable_ session (UPSDA --action=0)
+      send_abortable_ session (UPSDA --action=3)
 
   psm_enabled_psv_target -> List:
     return [1, 2000]  // TODO(kasper): Testing - go to sleep after ~9.2s.
