@@ -39,6 +39,9 @@ class SaraR4 extends UBloxCellular:
 
   on_connected_ session/at.Session:
 
+  psm_enabled_psv_target -> List:
+    return [4]
+
   on_reset session/at.Session:
     session.send CFUN.reset
 

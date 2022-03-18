@@ -472,26 +472,20 @@ abstract class UBloxCellular extends CellularBase:
     session.send_non_check
         at.Command.set "+CEDRXS" --parameters=[0]
 
-    psm_changed/bool := false
-    psm_target := enable ? 1 : 0
-    psm_value := session.read "+CPSMS"
-    if psm_value.single[0] != psm_target:
-      psm_changed = true  // PMS changes require a modem reboot. Remember it.
-      if enable:
-        session.set "+CPSMS" [1, null, null, periodic_tau, "00000000"]
-      else:
-        session.set "+CPSMS" [0]
+    psm_target := enable
+        ? [1, null, null, periodic_tau, "00000000"]
+        : [0]
+    psv_target := enable
+        ? psm_enabled_psv_target
+        : [0]
 
-    psv_value := session.read "+UPSV"
-    psv_target := enable ? 1 : 0
-    if psv_value.single[0] != psv_target:
-      if enable:
-        session.set "+UPSV" [1, 2000]  // TODO(kasper): Testing - go to sleep after ~9.2s.
-      else:
-        session.set "+UPSV" [0]
-
-    // Reboot only if PSM changed.
+    psm_changed/bool := apply_config_ session "+CPSMS" psm_target
+    apply_config_ session "+UPSV" psv_target
+    // Reboot only if PSM changed. The PSV value isn't reflected in the UPSV? readings after
+    // the reboot, so if we also reboot on PSV changes, we end up in an infinite loop.
     return psm_changed
+
+  abstract psm_enabled_psv_target -> List
 
   apply_configs_ session/at.Session -> bool:
     changed := false

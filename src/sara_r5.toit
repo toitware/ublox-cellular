@@ -36,6 +36,9 @@ class SaraR5 extends UBloxCellular:
     send_abortable_ session (UPSDA --action=0)
     send_abortable_ session (UPSDA --action=3)
 
+  psm_enabled_psv_target -> List:
+    return [1, 2000]  // TODO(kasper): Testing - go to sleep after ~9.2s.
+
   on_reset session/at.Session:
     session.send
       CFUN.reset --reset_sim
