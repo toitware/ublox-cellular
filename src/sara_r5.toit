@@ -29,10 +29,27 @@ class SaraR5 extends UBloxCellular:
       --preferred_baud_rate=3_250_000
       --use_psm=not is_always_online
 
+  list_equals a/List b/List -> bool:
+    if a.size != b.size: return false
+    a.size.repeat:
+      if a[it] != b[it]: return false
+    return true
+
   on_connected_ session/at.Session:
     // Attach to network.
-    changed := apply_config_ session "+UPSD" [0, 100, 1]
-    changed = (apply_config_ session "+UPSD" [0, 0, 0]) or changed
+    changed := false
+    upsd_map_cid_target := [0, 100, 1]
+    upsd_map_cid := session.send (UPSD.read --parameters=[0, 100])
+    if not list_equals upsd_map_cid.last upsd_map_cid_target:
+      session.set "+UPSD" upsd_map_cid_target
+      changed = true
+
+    upsd_protocol_target := [0, 0, 0]
+    upsd_protocol := session.send (UPSD.read --parameters=[0, 0])
+    if not list_equals upsd_protocol.last upsd_protocol_target:
+      session.set "+UPSD" upsd_protocol_target
+      changed = true
+
     if changed:
       send_abortable_ session (UPSDA --action=0)
       send_abortable_ session (UPSDA --action=3)
@@ -80,3 +97,10 @@ class UPSDA extends at.Command:
   // the UPSDA operation by sending more AT commands.
   static compute_timeout -> Duration:
     return min MAX_TIMEOUT (Duration --us=(task.deadline - Time.monotonic_us))
+
+class UPSD extends at.Command:
+  // TODO(kasper): This is a bit of hack that extends the at.Command
+  // with support for read parameters.
+  parameters/List ::= ?
+  constructor.read --.parameters=[]:
+    super.read "+UPSD"
