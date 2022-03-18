@@ -33,8 +33,8 @@ class SaraR5 extends UBloxCellular:
     // Attach to network.
     session.set "+UPSD" [0, 100, 1]
     session.set "+UPSD" [0, 0, 0]
-    session.set "+UPSDA" [0, 0]
-    session.set "+UPSDA" [0, 3]
+    send_abortable_ session (UPSDA --action=0)
+    send_abortable_ session (UPSDA --action=3)
 
   on_reset session/at.Session:
     session.send
@@ -64,3 +64,15 @@ class SaraR5 extends UBloxCellular:
   // Prefer reset over power_off (100ms vs ~25s).
   recover_modem:
     reset
+
+class UPSDA extends at.Command:
+  // UPSDA times out after 180s, but since it can be aborted, any timeout can be used.
+  static MAX_TIMEOUT ::= Duration --m=3
+
+  constructor --action/int:
+    super.set "+UPSDA" --parameters=[0, action] --timeout=compute_timeout
+
+  // We use the deadline in the task to let the AT processor know that we can abort
+  // the UPSDA operation by sending more AT commands.
+  static compute_timeout -> Duration:
+    return min MAX_TIMEOUT (Duration --us=(task.deadline - Time.monotonic_us))

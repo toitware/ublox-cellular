@@ -508,7 +508,7 @@ abstract class UBloxCellular extends CellularBase:
         return true
     return false
 
-  on_cops_aborted session/at.Session -> none:
+  on_aborted_command session/at.Session command/at.Session -> none:
     critical_do --no-respect_deadline:
       catch: with_timeout --ms=2_000:
         session.action "" --no-check  // Ping to flush out "+CME ERROR: Command aborted" error.
