@@ -26,7 +26,7 @@ class SaraR5 extends UBloxCellular:
       --logger=logger
       --config=CONFIG_
       --cat_m1
-      --preferred_baud_rate=921_600 // TODO(kasper): Testing - was 3_250_000.
+      --preferred_baud_rate=3_250_000
       --use_psm=not is_always_online
 
   on_connected_ session/at.Session:
@@ -45,8 +45,6 @@ class SaraR5 extends UBloxCellular:
       pwr_on.set 1
       sleep --ms=1000
       pwr_on.set 0
-      // TODO(kasper): Testing - the chip may need the pin to be off for 250ms.
-      sleep --ms=250
 
   power_off -> none:
     if pwr_on and reset_n:
