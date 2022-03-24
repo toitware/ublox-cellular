@@ -36,6 +36,9 @@ class SaraR5 extends UBloxCellular:
     return true
 
   on_connected_ session/at.Session:
+    catch: session.set "+UPSND" [0, 8]
+    catch: session.set "+UPSND" [0, 0]
+
     // Attach to network.
     changed := false
     upsd_map_cid_target := [0, 100, 1]
