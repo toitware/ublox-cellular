@@ -509,7 +509,7 @@ abstract class UBloxCellular extends CellularBase:
         5.repeat:
           // Send empty ping to flush out "+CME ERROR: Command aborted" errors.
           session.send_ empty_ping
-              --on_timeout=(: null)
+              --on_timeout=(: at.Result "" [])
               --on_error=(: if it == "+CME ERROR: Command aborted []": return)
           sleep --ms=100
 
