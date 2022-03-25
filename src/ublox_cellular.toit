@@ -414,14 +414,20 @@ abstract class UBloxCellular extends CellularBase:
           return r.single[0]
       sleep --ms=1_000
 
-  should_set_mno_ session/at.Session mno -> bool:
+  static MNO_UNDEFINED  /int ::= 0
+  static MNO_SIM_SELECT /int ::= 1
+  static MNO_GLOBAL     /int ::= 90
+  should_set_mno_ session/at.Session mno/int -> bool:
     current_mno := get_mno_ session
-    if mno == 1:
-      return current_mno == 0
-
+    // If we're asking for SIM ICCID/IMSI select (1), we should only
+    // set the MNO if it is currently undefined (0).
+    if mno == MNO_SIM_SELECT: return current_mno == MNO_UNDEFINED
+    // If we're asking for a standard MNO profile (starts at 100),
+    // we're okay with getting back a global one. No need to set mno.
+    if mno >= 100 and current_mno == MNO_GLOBAL: return false
     return current_mno != mno
 
-  configure apn --mno=100 --bands=null --rats=null:
+  configure apn --mno/int=100 --bands=null --rats=null:
     at_.do: | session/at.Session |
       should_reboot := false
       while true:
