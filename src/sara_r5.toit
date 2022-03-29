@@ -36,6 +36,8 @@ class SaraR5 extends UBloxCellular:
     return true
 
   on_connected_ session/at.Session:
+    catch --trace: session.read "+UCPSMS"
+
     catch --trace:
       upsd_status := session.set "+UPSND" [0, 8]
       if list_equals upsd_status.last [0, 8, 1]:

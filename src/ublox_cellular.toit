@@ -479,7 +479,7 @@ abstract class UBloxCellular extends CellularBase:
         at.Command.set "+CEDRXS" --parameters=[0]
 
     psm_target := enable
-        ? [1, null, null, periodic_tau, "00000000"]
+        ? [1, null, null, periodic_tau, "00001000"]  // T3324=Requested_Active_Time is 16s.
         : [0]
     psv_target := enable
         ? psm_enabled_psv_target
