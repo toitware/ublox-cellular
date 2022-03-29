@@ -39,6 +39,7 @@ class SaraR4 extends UBloxCellular:
 
   on_connected_ session/at.Session:
     catch --trace: session.read "+UCPSMS"
+    catch --trace: session.read "+UPSV"
 
   psm_enabled_psv_target -> List:
     return [4]
