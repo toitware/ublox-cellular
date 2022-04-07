@@ -473,8 +473,7 @@ abstract class UBloxCellular extends CellularBase:
   // TODO(kasper): Testing - default periodic tau is 70h.
   configure_psm_ session/at.Session --enable/bool --periodic_tau/string="01000111" -> bool:
     cedrxs_changed/bool := false
-    // TODO(kasper): Consider not tracing here.
-    catch --trace: cedrxs_changed = apply_config_ session "+CEDRXS" [0]
+    catch: cedrxs_changed = apply_config_ session "+CEDRXS" [0]
 
     psm_target := enable
         ? [1, null, null, periodic_tau, "00001000"]  // T3324=Requested_Active_Time is 16s.
