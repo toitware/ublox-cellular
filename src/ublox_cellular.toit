@@ -429,13 +429,9 @@ abstract class UBloxCellular extends CellularBase:
 
   configure apn --mno/int=100 --bands=null --rats=null:
     at_.do: | session/at.Session |
-      should_reboot := false
       while true:
-        if should_reboot: wait_for_ready_ session
-
+        should_reboot/bool := false
         enter_configuration_mode_ session
-
-        should_reboot = false
 
         if mno and should_set_mno_ session mno:
           set_mno_ session mno
@@ -458,7 +454,9 @@ abstract class UBloxCellular extends CellularBase:
 
         if (get_apn_ session) != apn:
           set_apn_ session apn
-          should_reboot = true
+          // TODO(kasper): Testing - disabling reboot after changing
+          // the CGDCONT settings.
+          // should_reboot = true
 
         if apply_configs_ session:
           should_reboot = true
@@ -474,9 +472,9 @@ abstract class UBloxCellular extends CellularBase:
 
   // TODO(kasper): Testing - default periodic tau is 70h.
   configure_psm_ session/at.Session --enable/bool --periodic_tau/string="01000111" -> bool:
-    // TODO(kasper): Do we need to reboot if this changed?
-    session.send_non_check
-        at.Command.set "+CEDRXS" --parameters=[0]
+    cedrxs_changed/bool := false
+    // TODO(kasper): Consider not tracing here.
+    catch --trace: cedrxs_changed = apply_config_ session "+CEDRXS" [0]
 
     psm_target := enable
         ? [1, null, null, periodic_tau, "00001000"]  // T3324=Requested_Active_Time is 16s.
@@ -485,12 +483,11 @@ abstract class UBloxCellular extends CellularBase:
         ? psm_enabled_psv_target
         : [0]
 
-    psm_changed/bool := apply_config_ session "+CPSMS" psm_target
+    cpsms_changed/bool := apply_config_ session "+CPSMS" psm_target
     apply_config_ session "+UPSV" psv_target
-    // Reboot only if PSM changed. The PSV value isn't reflected in the UPSV? readings after
-    // the reboot, so if we also reboot on PSV changes, we end up in an infinite loop.
-    return psm_changed
+    return reboot_after_cedrxs_or_cpsms_changes and (cedrxs_changed or cpsms_changed)
 
+  abstract reboot_after_cedrxs_or_cpsms_changes -> bool
   abstract psm_enabled_psv_target -> List
 
   apply_configs_ session/at.Session -> bool:
@@ -559,6 +556,10 @@ abstract class UBloxCellular extends CellularBase:
 
   reboot_ session/at.Session:
     on_reset session
+    // Rebooting the module should get it back into a ready state. We avoid
+    // calling $wait_for_ready_ because it flips the power on, which is too
+    // heavy an operation.
+    5.repeat: if select_baud_ session: return
     wait_for_ready_ session
 
   set_baud_rate_  session/at.Session baud_rate:

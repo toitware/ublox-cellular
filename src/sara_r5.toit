@@ -67,6 +67,9 @@ class SaraR5 extends UBloxCellular:
   psm_enabled_psv_target -> List:
     return [1, 2000]  // TODO(kasper): Testing - go to sleep after ~9.2s.
 
+  reboot_after_cedrxs_or_cpsms_changes -> bool:
+    return false
+
   on_reset session/at.Session:
     session.send
       CFUN.reset --reset_sim
