@@ -435,6 +435,8 @@ abstract class UBloxCellular extends CellularBase:
 
         if mno and should_set_mno_ session mno:
           set_mno_ session mno
+          get_mno_ session
+          print_ "Reboot because of MNO change"
           reboot_ session
           continue
 
@@ -443,6 +445,8 @@ abstract class UBloxCellular extends CellularBase:
         if cat_nb1: rat.add RAT_CAT_NB1_
         if (get_rat_ session) != rat:
           set_rat_ session rat
+          get_rat_ session
+          print_ "Will reboot because of URAT change"
           should_reboot = true
 
         if bands:
@@ -450,18 +454,24 @@ abstract class UBloxCellular extends CellularBase:
           bands.do: mask |= 1 << (it - 1)
           if not is_band_mask_set_ session mask:
             set_band_mask_ session mask
+            session.read "+UBANDMASK"
+            print_ "Will reboot because of UBANDMASK change"
             should_reboot = true
 
         if (get_apn_ session) != apn:
           set_apn_ session apn
+          get_apn_ session
+          print_ "Will not reboot because of APN changes"
           // TODO(kasper): Testing - disabling reboot after changing
           // the CGDCONT settings.
           // should_reboot = true
 
         if apply_configs_ session:
+          print_ "Will reboot because of config changes"
           should_reboot = true
 
         if configure_psm_ session --enable=use_psm:
+          print_ "Will reboot because of PSM changes"
           should_reboot = true
 
         if should_reboot:
