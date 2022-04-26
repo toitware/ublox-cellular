@@ -562,6 +562,10 @@ abstract class UBloxCellular extends CellularBase:
     wait_for_ready_ session
 
   set_baud_rate_  session/at.Session baud_rate:
+    // First try to read the baud rate the modem believes
+    // it can handle.
+    session.read "+IPR"
+    // Set the baud rate to the attempted one.
     session.set "+IPR" [baud_rate]
     uart_.set_baud_rate baud_rate
     sleep --ms=100

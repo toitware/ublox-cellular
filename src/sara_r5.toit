@@ -26,7 +26,7 @@ class SaraR5 extends UBloxCellular:
       --logger=logger
       --config=CONFIG_
       --cat_m1
-      --preferred_baud_rate=3_250_000
+      --preferred_baud_rate=921_600
       --use_psm=not is_always_online
 
   list_equals a/List b/List -> bool:
