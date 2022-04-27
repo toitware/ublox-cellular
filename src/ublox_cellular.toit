@@ -455,13 +455,15 @@ abstract class UBloxCellular extends CellularBase:
           if not is_band_mask_set_ session mask:
             set_band_mask_ session mask
             session.read "+UBANDMASK"
-            print_ "Will reboot because of UBANDMASK change"
-            should_reboot = true
+            print_ "Will NOT reboot because of UBANDMASK change"
+            // TODO(kasper): Testing - disabling reboot after changing
+            // the UBANDMASK settings.
+            // should_reboot = true
 
         if (get_apn_ session) != apn:
           set_apn_ session apn
           get_apn_ session
-          print_ "Will not reboot because of APN changes"
+          print_ "Will NOT reboot because of APN changes"
           // TODO(kasper): Testing - disabling reboot after changing
           // the CGDCONT settings.
           // should_reboot = true
@@ -568,14 +570,15 @@ abstract class UBloxCellular extends CellularBase:
     // Rebooting the module should get it back into a ready state. We avoid
     // calling $wait_for_ready_ because it flips the power on, which is too
     // heavy an operation.
-    5.repeat: if select_baud_ session: return
+    5.repeat:
+      if select_baud_ session:
+        // TODO(kasper): Added debug reading of baud rate.
+        session.read "+IPR"
+        return
     wait_for_ready_ session
 
   set_baud_rate_  session/at.Session baud_rate:
-    // First try to read the baud rate the modem believes
-    // it can handle.
-    session.read "+IPR"
-    // Set the baud rate to the attempted one.
+    // Set the baud rate to the requested one.
     session.set "+IPR" [baud_rate]
     uart_.set_baud_rate baud_rate
     sleep --ms=100
