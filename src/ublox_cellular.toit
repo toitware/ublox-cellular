@@ -432,11 +432,10 @@ abstract class UBloxCellular extends CellularBase:
       while true:
         should_reboot/bool := false
         enter_configuration_mode_ session
+        catch --trace: session.read "+IPR"
 
         if mno and should_set_mno_ session mno:
           set_mno_ session mno
-          get_mno_ session
-          print_ "Reboot because of MNO change"
           reboot_ session
           continue
 
@@ -445,35 +444,29 @@ abstract class UBloxCellular extends CellularBase:
         if cat_nb1: rat.add RAT_CAT_NB1_
         if (get_rat_ session) != rat:
           set_rat_ session rat
-          get_rat_ session
-          print_ "Will reboot because of URAT change"
           should_reboot = true
 
         if bands:
           mask := 0
           bands.do: mask |= 1 << (it - 1)
           if not is_band_mask_set_ session mask:
+            // We are already in offline mode (CFUN=0), so
+            // we must not reboot in this case. We've seen
+            // situations where the modem somehow resets the
+            // band mask on reboot causing us to spin around
+            // in a config loop.
             set_band_mask_ session mask
-            session.read "+UBANDMASK"
-            print_ "Will NOT reboot because of UBANDMASK change"
-            // TODO(kasper): Testing - disabling reboot after changing
-            // the UBANDMASK settings.
-            // should_reboot = true
 
         if (get_apn_ session) != apn:
+          // We are already in offline mode (CFUN=0), so
+          // we must not reboot in this case. See comment
+          // for the band mask setting.
           set_apn_ session apn
-          get_apn_ session
-          print_ "Will NOT reboot because of APN changes"
-          // TODO(kasper): Testing - disabling reboot after changing
-          // the CGDCONT settings.
-          // should_reboot = true
 
         if apply_configs_ session:
-          print_ "Will reboot because of config changes"
           should_reboot = true
 
         if configure_psm_ session --enable=use_psm:
-          print_ "Will reboot because of PSM changes"
           should_reboot = true
 
         if should_reboot:
@@ -570,11 +563,7 @@ abstract class UBloxCellular extends CellularBase:
     // Rebooting the module should get it back into a ready state. We avoid
     // calling $wait_for_ready_ because it flips the power on, which is too
     // heavy an operation.
-    5.repeat:
-      if select_baud_ session:
-        // TODO(kasper): Added debug reading of baud rate.
-        session.read "+IPR"
-        return
+    5.repeat: if select_baud_ session: return
     wait_for_ready_ session
 
   set_baud_rate_  session/at.Session baud_rate:
