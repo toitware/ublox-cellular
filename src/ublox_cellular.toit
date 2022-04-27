@@ -432,7 +432,7 @@ abstract class UBloxCellular extends CellularBase:
       while true:
         should_reboot/bool := false
         enter_configuration_mode_ session
-        catch --trace: session.read "+IPR"
+        catch --trace: session.test "+IPR"
 
         if mno and should_set_mno_ session mno:
           set_mno_ session mno
