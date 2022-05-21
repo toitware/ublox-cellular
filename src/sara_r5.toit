@@ -36,15 +36,11 @@ class SaraR5 extends UBloxCellular:
     return true
 
   on_connected_ session/at.Session:
-    catch --trace: session.read "+UCPSMS"
-    catch --trace: session.read "+UPSV"
-
-    catch --trace:
-      upsd_status := session.set "+UPSND" [0, 8]
-      if list_equals upsd_status.last [0, 8, 1]:
-        // The PDP profile is already active. Trying to change it is
-        // an illegal operation at this point.
-        return
+    upsd_status := session.set "+UPSND" [0, 8]
+    if list_equals upsd_status.last [0, 8, 1]:
+      // The PDP profile is already active. Trying to change it is
+      // an illegal operation at this point.
+      return
 
     // Attach to network.
     changed := false
