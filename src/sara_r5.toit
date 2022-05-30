@@ -71,13 +71,18 @@ class SaraR5 extends UBloxCellular:
       CFUN.reset --reset_sim
 
   power_on -> none:
-    if pwr_on:
+    if not pwr_on: return
+    critical_do --no-respect_deadline:
       pwr_on.set 1
       sleep --ms=1000
       pwr_on.set 0
+      // TODO(kasper): We try to wait for a bit like we do on
+      // the SaraR4. It isn't clear if this is necessary.
+      sleep --ms=250
 
   power_off -> none:
-    if pwr_on and reset_n:
+    if not (pwr_on and reset_n): return
+    critical_do --no-respect_deadline:
       pwr_on.set 1
       reset_n.set 1
       sleep --ms=23_000
@@ -86,10 +91,12 @@ class SaraR5 extends UBloxCellular:
       reset_n.set 0
 
   reset -> none:
-    if reset_n:
+    if not reset_n: return
+    critical_do --no-respect_deadline:
       reset_n.set 1
-      sleep --ms=100
+      sleep --ms=150  // Minimum is 100ms.
       reset_n.set 0
+      sleep --ms=250  // Wait like we do in $power_on.
 
   // Prefer reset over power_off (100ms vs ~25s).
   recover_modem:
