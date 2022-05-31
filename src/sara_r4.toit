@@ -50,7 +50,8 @@ class SaraR4 extends UBloxCellular:
     session.send CFUN.reset
 
   power_on -> none:
-    if pwr_on:
+    if not pwr_on: return
+    critical_do --no-respect_deadline:
       pwr_on.set 1
       sleep --ms=150
       pwr_on.set 0
@@ -58,13 +59,15 @@ class SaraR4 extends UBloxCellular:
       sleep --ms=250
 
   power_off -> none:
-    if pwr_on:
+    if not pwr_on: return
+    critical_do --no-respect_deadline:
       pwr_on.set 1
       sleep --ms=1500
       pwr_on.set 0
 
   reset -> none:
-    if reset_n:
+    if not reset_n: return
+    critical_do --no-respect_deadline:
       reset_n.set 1
       sleep --ms=10_000
       reset_n.set 0
