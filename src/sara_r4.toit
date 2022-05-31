@@ -73,4 +73,7 @@ class SaraR4 extends UBloxCellular:
       reset_n.set 0
 
   recover_modem:
-    reset
+    if reset_n:
+      reset
+    else:
+      power_off
