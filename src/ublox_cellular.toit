@@ -399,14 +399,16 @@ abstract class UBloxCellular extends CellularBase:
   close:
     try:
       sockets_.values.do: it.closed_
-      2.repeat: | attempt/int |
-        catch: with_timeout --ms=1_500: at_.do:
-          if not it.is_closed and (not use_psm or failed_to_connect or is_lte_connection_):
-            it.send CPWROFF
-          return
+      at_.do: | session/at.Session |
+        if session.is_closed: return
+        if use_psm and not failed_to_connect and not is_lte_connection_: return
         // If the chip was recently rebooted, wait for it to be responsive before
-        // communicating with it again. Only do this once.
-        if attempt == 0: wait_for_ready
+        // communicating with it again.
+        attempts := 0
+        while not select_baud_ session:
+          if ++attempts > 5: return
+        // Send the power-off command.
+        session.send CPWROFF
     finally:
       at_session_.close
       uart_.close
