@@ -85,9 +85,9 @@ class SaraR5 extends UBloxCellular:
     critical_do --no-respect_deadline:
       pwr_on.set 1
       reset_n.set 1
-      sleep --ms=23_000
+      sleep --ms=23_100  // Minimum is 23,000 ms.
       pwr_on.set 0
-      sleep --ms=1500
+      sleep --ms=1_600   // Minimum is 1,500 ms.
       reset_n.set 0
 
   reset -> none:
