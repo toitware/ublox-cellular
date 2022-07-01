@@ -38,7 +38,7 @@ monitor SocketState_:
     state_ |= state
 
   clear state:
-    // Guard against clearing inread state (e.g. if state was updated
+    // Guard against clearing unread state (e.g. if state was updated
     // in between wait_for and clear).
     if not dirty_:
       state_ &= ~state
@@ -94,11 +94,19 @@ class TcpSocket extends Socket_ implements tcp.Socket:
 
   peer_address/net.SocketAddress ::= ?
 
-  set_no_delay value/bool:
-    cellular_.at_.do: it.set "+USOSO" [get_id_, SOCKET_LEVEL_TCP_, OPTION_TCP_NO_DELAY_, value ? 1 : 0]
-
   constructor cellular/UBloxCellular id/int .peer_address:
     super cellular id
+
+  // TODO(kasper): Deprecated. Remove.
+  set_no_delay value/bool:
+    no_delay = value
+
+  no_delay -> bool:
+    // TODO(kasper): Implement this.
+    return false
+
+  no_delay= value/bool -> none:
+    cellular_.at_.do: it.set "+USOSO" [get_id_, SOCKET_LEVEL_TCP_, OPTION_TCP_NO_DELAY_, value ? 1 : 0]
 
   local_address -> net.SocketAddress:
     return net.SocketAddress
@@ -596,11 +604,18 @@ abstract class UBloxCellular extends CellularBase:
 class UBloxConstants implements Constants:
   RatCatM1 -> int?: return null
 
-class Interface_ extends net.Interface:
+class Interface_ implements net.Interface:
   cellular_/UBloxCellular
   tcp_connect_mutex_ ::= monitor.Mutex
 
   constructor .cellular_:
+
+  is_closed -> bool:
+    // TODO(kasper): Implement this?
+    return false
+
+  address -> net.IpAddress:
+    unreachable
 
   resolve host/string -> List:
     // First try parsing it as an ip.
@@ -612,16 +627,18 @@ class Interface_ extends net.Interface:
       UDNSRN.sync host
     return res.single.map: net.IpAddress.parse it
 
-  udp_open -> udp.Socket:
-    return udp_open --port=null
-
-  udp_open --port/int? -> udp.Socket:
+  udp_open --port/int?=null -> udp.Socket:
     if port and port != 0: throw "cannot bind to custom port"
     res := cellular_.at_.do: it.set "+USOCR" [17]
     id := res.single[0]
     socket := UdpSocket cellular_ id
     cellular_.sockets_.update id --if_absent=(: socket): throw "socket already exists"
     return socket
+
+  tcp_connect host/string port/int -> tcp.Socket:
+    ips := resolve host
+    return tcp_connect
+        net.SocketAddress ips[0] port
 
   tcp_connect address/net.SocketAddress -> tcp.Socket:
     res := cellular_.at_.do: it.set "+USOCR" [6]
@@ -641,10 +658,8 @@ class Interface_ extends net.Interface:
   tcp_listen port/int -> tcp.ServerSocket:
     throw "UNIMPLEMENTED"
 
-  address -> net.IpAddress:
-    unreachable
-
   close:
+    // TODO(kasper): Implement this?
 
 class UDNSRN extends at.Command:
   static TIMEOUT ::= Duration --s=70
