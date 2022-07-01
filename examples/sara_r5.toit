@@ -4,7 +4,7 @@
 
 /**
 This example demonstrates how to connect to a network service through the
-  cellular network provided by a Sara R4 modem.
+  cellular network provided by a Sara R5 modem.
 
 The example resets the modem before connecting to remove any unexpected state
   before connecting. However, this makes the connection time fairly long.
@@ -13,11 +13,11 @@ import monitor
 import http
 import net.cellular
 
-import ublox.sara_r4 show SaraR4Service
+import ublox.sara_r5 show SaraR5Service
 
 main:
   spawn::
-    service := SaraR4Service
+    service := SaraR5Service
     service.install
     // Keep the spawned process alive by blocking on a
     // latch that never gets a value.
@@ -34,8 +34,8 @@ main:
     cellular.CONFIG_UART_TX: 16,
     cellular.CONFIG_UART_RX: 17,
 
-    cellular.CONFIG_POWER: [18, cellular.CONFIG_OPEN_DRAIN],
-    cellular.CONFIG_RESET: [ 4, cellular.CONFIG_OPEN_DRAIN],
+    cellular.CONFIG_POWER: [21, cellular.CONFIG_ACTIVE_HIGH],
+    cellular.CONFIG_RESET: [ 4, cellular.CONFIG_ACTIVE_HIGH],
   }
 
   print "Opening cellular network"
