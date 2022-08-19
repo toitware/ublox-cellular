@@ -517,9 +517,9 @@ abstract class UBloxCellular extends CellularBase:
 
   on_aborted_command session/at.Session command/at.Command -> none:
     critical_do --no-respect_deadline:
-      catch --trace: with_timeout --ms=2_000:
-        empty_ping := at.Command.raw "" --timeout=(Duration --ms=200)
-        5.repeat:
+      catch --trace=(: it != DEADLINE_EXCEEDED_ERROR): with_timeout --ms=3_000:
+        empty_ping := at.Command.raw "" --timeout=(Duration --ms=250)
+        6.repeat:
           // Send empty ping to flush out "+CME ERROR: Command aborted" errors.
           session.send_ empty_ping
               --on_timeout=:
