@@ -522,24 +522,32 @@ abstract class UBloxCellular extends CellularBase:
     // Flush out the CME ERROR: Command aborted response.
     exception := null
     iteration := 0
+    attempts ::= []
     critical_do --no-respect_deadline:
       exception = catch --trace=(: it != DEADLINE_EXCEEDED_ERROR): with_timeout --ms=3_000:
         empty_ping := at.Command.raw "" --timeout=(Duration --ms=250)
         6.repeat:
           iteration++
           // Send empty ping to flush out "+CME ERROR: Command aborted" errors.
-          session.send_ empty_ping
+          handled := false
+          result := session.send_ empty_ping
               --on_timeout=:
                 // Return an empty at.Result. We can't use null because send_ insists
                 // on returning a non-null at.Result.
+                attempts.add "-()"
+                handled = true
                 at.Result "" []
               --on_error=: | _ result/at.Result |
                 // If we got an aborted command result, we're done!
+                handled = true
                 if result.code == "+CME ERROR: Command aborted":
-                  catch --trace: throw "SUCCESS: abort command after $iteration attempts: $command"
+                  catch --trace: throw "SUCCESS: abort command after $iteration attempts: $command - $attempts"
                   return
+                attempts.add "-($result.code)"
+          if not handled:
+            attempts.add "+($result.code)"
           sleep --ms=100
-    catch --trace: throw "FAILED: abort command after $iteration attempts: $command ($exception)"
+    catch --trace: throw "FAILED: abort command after $iteration attempts: $command ($exception) - $attempts"
 
   get_mno_ session/at.Session:
     result := session.read "+UMNOPROF"
