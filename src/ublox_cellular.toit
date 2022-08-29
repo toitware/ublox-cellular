@@ -524,12 +524,13 @@ abstract class UBloxCellular extends CellularBase:
     iteration := 0
     attempts ::= []
     critical_do --no-respect_deadline:
-      exception = catch --trace=(: it != DEADLINE_EXCEEDED_ERROR): with_timeout --ms=3_000:
-        empty_ping := at.Command.raw "" --timeout=(Duration --ms=250)
-        6.repeat:
+      exception = catch --trace=(: it != DEADLINE_EXCEEDED_ERROR): with_timeout --ms=20_000:
+        empty_ping := at.Command.raw "" --timeout=(Duration --ms=5_000)
+        3.repeat:
           iteration++
           // Send empty ping to flush out "+CME ERROR: Command aborted" errors.
           handled := false
+          start := Time.monotonic_us
           result := session.send_ empty_ping
               --on_timeout=:
                 // Return an empty at.Result. We can't use null because send_ insists
@@ -541,12 +542,12 @@ abstract class UBloxCellular extends CellularBase:
                 // If we got an aborted command result, we're done!
                 handled = true
                 if result.code == "+CME ERROR: Command aborted":
-                  catch --trace: throw "SUCCESS: abort command after $iteration attempts: $command - $attempts"
+                  elapsed := Time.monotonic_us - start
+                  catch --trace: throw "SUCCESS: abort command after $iteration attempts in $(elapsed)us: $command - $attempts"
                   return
                 attempts.add "-($result.code)"
           if not handled:
             attempts.add "+($result.code)"
-          sleep --ms=100
     catch --trace: throw "FAILED: abort command after $iteration attempts: $command ($exception) - $attempts"
 
   get_mno_ session/at.Session:
