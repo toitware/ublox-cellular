@@ -14,6 +14,12 @@ import cellular
 import cellular.base show *
 import cellular.service show CellularServiceDefinition
 
+main:
+  service := SaraR5Service
+  service.install
+
+// --------------------------------------------------------------------------
+
 class SaraR5Service extends CellularServiceDefinition:
   constructor:
     super "ublox/sara_r5" --major=0 --minor=1 --patch=0

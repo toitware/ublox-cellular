@@ -9,17 +9,11 @@ This example demonstrates how to connect to a network service through the
 The example resets the modem before connecting to remove any unexpected state
   before connecting. However, this makes the connection time fairly long.
 */
-import monitor
+
 import http
 import net.cellular
 
-import ublox.sara_r4 show SaraR4Service
-
 main:
-  spawn::
-    service := SaraR4Service
-    service.install
-
   config ::= {
     cellular.CONFIG_APN: "onomondo",
     cellular.CONFIG_BANDS: [20, 8],
