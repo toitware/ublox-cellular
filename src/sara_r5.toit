@@ -25,7 +25,11 @@ class SaraR5Service extends CellularServiceDefinition:
     super "ublox/sara_r5" --major=0 --minor=1 --patch=0
 
   create_driver --port/uart.Port --power/gpio.Pin? --reset/gpio.Pin? -> cellular.Cellular:
-    return SaraR5 port --pwr_on=power --reset_n=reset --is_always_online=true
+    return SaraR5 port
+        --logger=create_logger
+        --pwr_on=power
+        --reset_n=reset
+        --is_always_online=true
 
 /**
 Driver for Sara-R5, GSM communicating over NB-IoT & M1.
