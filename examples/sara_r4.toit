@@ -19,13 +19,6 @@ main:
   spawn::
     service := SaraR4Service
     service.install
-    // Keep the spawned process alive by blocking on a
-    // latch that never gets a value.
-    (monitor.Latch).get
-
-  // TODO(kasper): It is error prone to have to sleep
-  // until the service has been installed.
-  sleep --ms=1_000
 
   config ::= {
     cellular.CONFIG_APN: "onomondo",
