@@ -15,14 +15,14 @@ import net.cellular
 
 main:
   config ::= {
-    cellular.CONFIG_APN: "onomondo",
+    cellular.CONFIG_APN: "soracom.io",
     cellular.CONFIG_BANDS: [20, 8],
 
     cellular.CONFIG_UART_TX: 16,
     cellular.CONFIG_UART_RX: 17,
 
-    cellular.CONFIG_POWER: [21, cellular.CONFIG_ACTIVE_HIGH],
-    cellular.CONFIG_RESET: [ 4, cellular.CONFIG_ACTIVE_HIGH],
+    cellular.CONFIG_POWER: [18, cellular.CONFIG_ACTIVE_HIGH],
+    cellular.CONFIG_RESET: [ 4, cellular.CONFIG_OPEN_DRAIN],
   }
 
   print "Opening cellular network"
