@@ -25,8 +25,7 @@ main:
     cellular.CONFIG_POWER: [18, cellular.CONFIG_OPEN_DRAIN],
     cellular.CONFIG_RESET: [ 4, cellular.CONFIG_OPEN_DRAIN],
 
-    // TODO(kasper): Use cellular.CONFIG_LOG_LEVEL.
-    "log.level": log.INFO_LEVEL,
+    cellular.CONFIG_LOG_LEVEL: log.INFO_LEVEL,
   }
 
   print "Opening cellular network"
