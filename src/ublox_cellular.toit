@@ -145,7 +145,11 @@ class TcpSocket extends Socket_ implements tcp.Socket:
         // If we get an exception while writing, we risk leaving the
         // modem in an awful state. Close the session to force us to
         // start over.
-        if is_exception: session.close
+        if is_exception:
+          session.close
+          // The modem may become unresponsive at this point, so we
+          // try to force it to recover.
+          critical_do --no-respect_deadline: cellular_.recover_modem
     // Give processing time to other tasks, to avoid busy write-loop that starves readings.
     yield
     return data.size
