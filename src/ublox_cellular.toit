@@ -148,8 +148,8 @@ class TcpSocket extends Socket_ implements tcp.Socket:
         if is_exception:
           session.close
           // The modem may become unresponsive at this point, so we
-          // try to force it to recover.
-          critical_do --no-respect_deadline: cellular_.recover_modem
+          // try to force it to power off.
+          cellular_.power_off
     // Give processing time to other tasks, to avoid busy write-loop that starves readings.
     yield
     return data.size
